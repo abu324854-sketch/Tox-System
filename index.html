@@ -3,38 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tox-System OS</title>
+    <title>Tox-System Launcher</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: radial-gradient(circle at center, #090d16 0%, #020408 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: pan-y;
+            background: #030712;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            touch-action: none;
         }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
+        .glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
         }
         .app-icon:active {
             transform: scale(0.92);
         }
-        /* Yuqoridan pastga tushuvchi parda (Control Center) */
+        /* Bildirishnoma va boshqaruv parda */
         #drop-panel {
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.1, 1, 0.1, 1);
             transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
         }
         #drop-panel.active {
             transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
         }
         /* Ilova oynasi */
         #app-window {
-            transition: all 0.3s ease;
-            transform: scale(0.95);
+            transition: all 0.25s ease-out;
+            transform: scale(0.96);
             opacity: 0;
             pointer-events: none;
         }
@@ -45,180 +42,140 @@
         }
     </style>
 </head>
-<body class="text-white h-screen flex flex-col justify-between p-4 select-none overflow-hidden relative" id="main-body">
+<body class="text-white h-screen flex flex-col justify-between p-4 select-none relative">
 
-    <!-- Status Bar (Buni pastga tortsa panel ochiladi) -->
-    <div onclick="toggleDropPanel()" class="glass-panel flex justify-between items-center text-xs text-sky-300 px-4 py-2.5 rounded-2xl shadow-lg z-30 cursor-pointer active:scale-95 transition">
+    <!-- Status Bar -->
+    <div onclick="togglePanel()" class="glass flex justify-between items-center text-xs text-sky-300 px-4 py-2.5 rounded-2xl shadow-lg z-30 cursor-pointer">
         <span id="clock" class="font-mono font-bold">00:00</span>
-        <span class="tracking-widest font-extrabold text-sky-400">TOX-SYSTEM ⚡ [Tortish]</span>
+        <span class="tracking-widest font-extrabold text-sky-400">TOX-SYSTEM</span>
         <span id="battery" class="font-mono">--% ⚡</span>
     </div>
 
-    <!-- YUQORIDAN PASTGA TUSHUVCHI MAXSUS PANEL (Control Center) -->
-    <div id="drop-panel" class="absolute inset-x-4 top-16 glass-panel rounded-3xl p-5 z-40 shadow-2xl border border-sky-400/40">
+    <!-- Yuqoridan tushuvchi professional Control Center -->
+    <div id="drop-panel" class="absolute inset-x-4 top-16 glass rounded-3xl p-5 z-40 shadow-2xl border border-sky-500/30">
         <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
-            <span class="text-xs font-bold tracking-widest text-sky-400">TOX CONTROL CENTER</span>
-            <button onclick="toggleDropPanel()" class="text-slate-400 hover:text-white text-sm">✕ Yopish</button>
+            <span class="text-xs font-bold tracking-widest text-sky-400">BOSHQARUV MARKAZI</span>
+            <button onclick="togglePanel()" class="text-slate-400 text-sm">✕</button>
         </div>
-        
-        <!-- Tezkor tugmalar -->
-        <div class="grid grid-cols-3 gap-3 mb-4">
-            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+        <div class="grid grid-cols-3 gap-3">
+            <div class="glass p-3 rounded-2xl text-center">
                 <span class="text-xl">🛡️</span>
-                <p class="text-[10px] mt-1 text-slate-300">Shzal</p>
+                <p class="text-[10px] mt-1 text-slate-300">Himoyalangan</p>
             </div>
-            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+            <div class="glass p-3 rounded-2xl text-center">
                 <span class="text-xl">📡</span>
-                <p class="text-[10px] mt-1 text-slate-300">Node</p>
+                <p class="text-[10px] mt-1 text-slate-300">Node Sync</p>
             </div>
-            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+            <div class="glass p-3 rounded-2xl text-center">
                 <span class="text-xl">⚡</span>
-                <p class="text-[10px] mt-1 text-slate-300">Turbo</p>
+                <p class="text-[10px] mt-1 text-slate-300">Optimizatsiya</p>
             </div>
-        </div>
-
-        <!-- Tizim holati -->
-        <div class="bg-slate-950/60 p-3 rounded-xl text-[11px] font-mono text-slate-400">
-            Holat: Barcha chastotalar xavfsiz. Tashqi ta'sir yo'q.
         </div>
     </div>
 
-    <!-- Asosiy Ish Stoli (Desktop) -->
+    <!-- Ish stoli va Ilovalar Grid -->
     <div class="flex-1 flex flex-col justify-center items-center px-2 z-10">
         <div class="w-full max-w-sm mb-6 text-center">
-            <h2 class="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Xususiy Ekotizim</h2>
-            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System v1.0</h1>
+            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System</h1>
+            <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-wider">Professional Ekotizim Yadrosi</p>
         </div>
 
-        <!-- Ilovalar Grid paneli -->
-        <div class="grid grid-cols-4 gap-4 w-full max-w-sm mb-6">
-            <div onclick="openApp('Himoya', '🛡️', 'Tizim xavfsizligi 100%. Tashqi tahdidlar topilmadi va firewall barqaror ishlamoqda.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+        <div class="grid grid-cols-4 gap-4 w-full max-w-sm">
+            <div onclick="openApp('Himoya', '🛡️', 'Tizim xavfsizlik devori to\'liq quvvatda ishlamoqda. Tahdidlar aniqlanmadi.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">🛡️</span>
-                <span class="text-[10px] text-slate-300 font-medium">Himoya</span>
+                <span class="text-[10px] text-slate-300">Himoya</span>
             </div>
-            <div onclick="openApp('Bulut', '🗄️', 'Mahalliy shifrlangan ombor ulandi. Ishlatilgan hajm: 0 MB / 128 GB.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Bulut', '🗄️', 'Maxfiy bulut xotirasi ulandi. Barcha fayllar shifrlangan.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">🗄️</span>
-                <span class="text-[10px] text-slate-300 font-medium">Bulut</span>
+                <span class="text-[10px] text-slate-300">Bulut</span>
             </div>
-            <div onclick="openApp('Terminal', '💻', 'root@tox-system:~# status --active\nKernel: stable\nMemory: optimized\nSecure connection established.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Terminal', '💻', 'root@tox-system:~# system-check --ok\nKernel: Toxirjon-Core active.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">💻</span>
-                <span class="text-[10px] text-slate-300 font-medium">Terminal</span>
+                <span class="text-[10px] text-slate-300">Terminal</span>
             </div>
-            <div onclick="openApp('Temir', '📊', 'Qurilma arxitekturasi tekshirildi. Oqim va chastotalar nazorat ostida.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Temir', '📊', 'Markaziy protsessor va xotira holati barqaror.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">📊</span>
-                <span class="text-[10px] text-slate-300 font-medium">Temir</span>
+                <span class="text-[10px] text-slate-300">Temir</span>
             </div>
-            <div onclick="openApp('Aloqa', '📡', 'Shaxsiy chastota (Secure Node) tarmog\'iga ulangan. Signalli uzatish xavfsiz.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Aloqa', '📡', 'Shaxsiy chastota tarmog\'i ulangan.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">📡</span>
-                <span class="text-[10px] text-slate-300 font-medium">Aloqa</span>
+                <span class="text-[10px] text-slate-300">Aloqa</span>
             </div>
-            <div onclick="openApp('Fayllar', '📁', '/system/apps/ katalogi tekshirildi. Barcha modullar o\'rnatilgan va ishga tayyor.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Fayllar', '📁', '/system/core/ - Barcha modullar joyida.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">📁</span>
-                <span class="text-[10px] text-slate-300 font-medium">Fayllar</span>
+                <span class="text-[10px] text-slate-300">Fayllar</span>
             </div>
-            <div onclick="openApp('Shifr', '🔐', 'AES-256 protokoli faol. Ma\'lumotlar shifrlangan holda saqlanmoqda.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Shifr', '🔐', 'AES-256 shifrlash protokoli faol.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">🔐</span>
-                <span class="text-[10px] text-slate-300 font-medium">Shifr</span>
+                <span class="text-[10px] text-slate-300">Shifr</span>
             </div>
-            <div onclick="openApp('Sozlamalar', '⚙️', 'Versiya: Tox-System v1.0\nMuallif: Fattoxov Abdulloh (Toxirjon Core)\nHolat: Mustaqil yadro.')" class="app-icon glass-panel flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
+            <div onclick="openApp('Sozlamalar', '⚙️', 'Tox-System v1.0. Muallif: Fattoxov Abdulloh.')" class="app-icon glass flex flex-col items-center justify-center p-3.5 rounded-2xl cursor-pointer transition">
                 <span class="text-2xl mb-1">⚙️</span>
-                <span class="text-[10px] text-slate-300 font-medium">Sozlama</span>
+                <span class="text-[10px] text-slate-300">Sozlama</span>
             </div>
-        </div>
-
-        <div class="glass-panel w-full max-w-sm p-3 rounded-2xl text-xs text-slate-400 text-center font-mono">
-            [Tox-Core]: Yuqori panelni ochish uchun status bar ustiga bosing.
         </div>
     </div>
 
-    <!-- TO'LIQ EKRANDAGI ILOVA OYNASI -->
-    <div id="app-window" class="absolute inset-4 top-16 bottom-20 glass-panel rounded-3xl p-6 flex flex-col justify-between z-20 shadow-2xl border border-sky-500/30">
+    <!-- To'liq ekran Ilova Oynasi -->
+    <div id="app-window" class="absolute inset-4 top-16 bottom-20 glass rounded-3xl p-6 flex flex-col justify-between z-20 shadow-2xl border border-sky-500/30">
         <div>
             <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
                 <div class="flex items-center space-x-3">
                     <span id="app-icon-lg" class="text-3xl">📱</span>
-                    <h2 id="app-title-lg" class="text-lg font-bold text-sky-400">Ilova Nomi</h2>
+                    <h2 id="app-title-lg" class="text-lg font-bold text-sky-400">Modul</h2>
                 </div>
-                <button onclick="closeApp()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 w-8 h-8 rounded-full flex items-center justify-center text-sm transition">✕</button>
+                <button onclick="closeApp()" class="glass w-8 h-8 rounded-full flex items-center justify-center text-sm text-slate-300">✕</button>
             </div>
             <div id="app-content-lg" class="text-sm text-slate-300 font-mono leading-relaxed whitespace-pre-line">
-                Ma'lumotlar yuklanmoqda...
+                Yuklanmoqda...
             </div>
         </div>
-        <div class="text-center text-[10px] text-slate-500 font-mono">
-            Tox-System Secure Environment
-        </div>
+        <div class="text-center text-[10px] text-slate-500 font-mono">Tox-System Core Environment</div>
     </div>
 
-    <!-- Pastki Dock paneli -->
-    <div class="glass-panel rounded-2xl p-3 flex justify-around items-center z-10">
-        <button onclick="closeApp(); toggleDropPanel(false);" class="text-xl hover:scale-110 transition">🏛️</button>
-        <button onclick="openApp('Terminal', '💻', 'root@tox-system:~# direct-exec\nAll systems nominal.')" class="text-xl hover:scale-110 transition">⚡</button>
-        <button onclick="openApp('Sozlamalar', '⚙️', 'Versiya: Tox-System v1.0\nToxirjon Core')" class="text-xl hover:scale-110 transition">⚙️</button>
+    <!-- Pastki Dock -->
+    <div class="glass rounded-2xl p-3 flex justify-around items-center z-10">
+        <button onclick="closeApp(); togglePanel(false);" class="text-xl">🏛️</button>
+        <button onclick="openApp('Terminal', '💻', 'root@tox-system:~# direct-exec')" class="text-xl">⚡</button>
+        <button onclick="openApp('Sozlamalar', '⚙️', 'Tox-System v1.0')" class="text-xl">⚙️</button>
     </div>
 
     <script>
-        // Soat
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }, 1000);
 
-        // Batareya holati
         if ('getBattery' in navigator) {
-            navigator.getBattery().then(battery => {
-                const updateBat = () => {
-                    document.getElementById('battery').innerText = Math.round(battery.level * 100) + '% ⚡';
-                };
-                updateBat();
-                battery.addEventListener('levelchange', updateBat);
+            navigator.getBattery().then(b => {
+                document.getElementById('battery').innerText = Math.round(b.level * 100) + '% ⚡';
             });
         } else {
             document.getElementById('battery').innerText = '100% ⚡';
         }
 
-        // Yuqoridan pastga tushuvchi panelni ochish/yopish
-        function toggleDropPanel(forceState) {
-            const panel = document.getElementById('drop-panel');
-            if (forceState === false) {
-                panel.classList.remove('active');
-            } else {
-                panel.classList.toggle('active');
-            }
+        function togglePanel(force) {
+            const p = document.getElementById('drop-panel');
+            if (force === false) p.classList.remove('active');
+            else p.classList.toggle('active');
         }
 
-        // Tezkor tugmalar effekti
-        function toggleControl(el) {
-            el.classList.toggle('bg-sky-600/40');
-            el.classList.toggle('border-sky-400');
-        }
-
-        // Ilovani to'liq ekranda ochish
         function openApp(name, icon, content) {
-            toggleDropPanel(false); // Paneldan ochilsa yopib qo'yish
+            togglePanel(false);
             document.getElementById('app-title-lg').innerText = name;
             document.getElementById('app-icon-lg').innerText = icon;
             document.getElementById('app-content-lg').innerText = content;
             document.getElementById('app-window').classList.add('active');
         }
 
-        // Ilovani yopish
         function closeApp() {
             document.getElementById('app-window').classList.remove('active');
         }
 
-        // Ekrandan pastga tortish harakatini sezish (Touch swipe down)
-        let touchStartY = 0;
-        window.addEventListener('touchstart', e => {
-            touchStartY = e.touches[0].clientY;
-        });
-
+        // Swipe down to open panel
+        let startY = 0;
+        window.addEventListener('touchstart', e => startY = e.touches[0].clientY);
         window.addEventListener('touchend', e => {
-            let touchEndY = e.changedTouches[0].clientY;
-            // Agar barmoq ekran yuqorisidan pastga qarab tortilsa
-            if (touchStartY < 100 && touchEndY - touchStartY > 60) {
-                toggleDropPanel(true);
-            }
+            if (startY < 50 && e.changedTouches[0].clientY - startY > 50) togglePanel(true);
         });
     </script>
 </body>
