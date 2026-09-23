@@ -3,48 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tox-System | Shaxsiy Ekotizim</title>
+    <title>Tox-System OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* iOS va Android'dan farqli o'laroq o'ta futuristik va qora-neon dizayn */
+        body {
+            background: radial-gradient(circle at center, #090d16 0%, #020408 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+        }
+        .app-icon:active {
+            transform: scale(0.92);
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-white h-screen flex flex-col justify-between p-4 select-none">
+<body class="text-white h-screen flex flex-col justify-between p-4 select-none overflow-hidden">
 
-    <!-- Yuqori panel (Status bar) -->
-    <div class="flex justify-between items-center text-xs text-slate-400 px-2 py-1 bg-slate-900/80 rounded-xl backdrop-blur">
-        <span id="clock">00:00</span>
-        <span class="font-bold tracking-wider text-sky-400">TOX-SYSTEM</span>
-        <span>100% 🔋</span>
+    <!-- Status Bar (Real telefon ma'lumotlari bilan) -->
+    <div class="glass-panel flex justify-between items-center text-xs text-sky-300 px-4 py-2 rounded-2xl shadow-lg">
+        <span id="clock" class="font-mono font-bold">00:00</span>
+        <span class="tracking-widest font-extrabold text-sky-400">TOX-SYSTEM KERNEL</span>
+        <span id="battery" class="font-mono">100% ⚡</span>
     </div>
 
-    <!-- Asosiy ish stoli (Desktop / UI) -->
-    <div class="flex flex-col items-center justify-center flex-1 text-center">
-        <div class="w-24 h-24 bg-sky-600 rounded-3xl flex items-center justify-center text-4xl shadow-lg shadow-sky-500/30 mb-4 animate-pulse">
-            ⚡
+    <!-- Asosiy Ish Stoli (Apps Grid) -->
+    <div class="flex-1 flex flex-col justify-center items-center px-2">
+        <div class="w-full max-w-sm mb-6 text-center">
+            <h2 class="text-xs uppercase tracking-widest text-slate-500 mb-1">Xususiy Ekotizim</h2>
+            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System v1.0</h1>
         </div>
-        <h1 class="text-2xl font-bold mb-1">Tox-System</h1>
-        <p class="text-slate-400 text-sm max-w-xs mb-6">Mustaqil xususiy yadro faol. Barcha ma'lumotlar nazorat ostida.</p>
-        
-        <button onclick="openSystem()" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-sky-500/25 transition active:scale-95">
-            Tizimni Boshqarish
-        </button>
+
+        <!-- Ilovalar Grid paneli -->
+        <div class="grid grid-cols-4 gap-4 w-full max-w-sm">
+            <div onclick="openApp('Xavfsizlik')" class="app-icon glass-panel flex flex-col items-center justify-center p-3 rounded-2xl cursor-pointer transition">
+                <span class="text-2xl mb-1">🛡️</span>
+                <span class="text-[10px] text-slate-300 font-medium">Himoya</span>
+            </div>
+            <div onclick="openApp('Bulut Xotira')" class="app-icon glass-panel flex flex-col items-center justify-center p-3 rounded-2xl cursor-pointer transition">
+                <span class="text-2xl mb-1">🗄️</span>
+                <span class="text-[10px] text-slate-300 font-medium">Bulut</span>
+            </div>
+            <div onclick="openApp('Terminal')" class="app-icon glass-panel flex flex-col items-center justify-center p-3 rounded-2xl cursor-pointer transition">
+                <span class="text-2xl mb-1">💻</span>
+                <span class="text-[10px] text-slate-300 font-medium">Terminal</span>
+            </div>
+            <div onclick="getDeviceInfo()" class="app-icon glass-panel flex flex-col items-center justify-center p-3 rounded-2xl cursor-pointer transition">
+                <span class="text-2xl mb-1">📊</span>
+                <span class="text-[10px] text-slate-300 font-medium">Temir</span>
+            </div>
+        </div>
+
+        <!-- Ma'lumot oynasi -->
+        <div id="screen-box" class="glass-panel w-full max-w-sm mt-6 p-4 rounded-2xl text-xs text-slate-300 min-h-[90px] flex items-center justify-center text-center font-mono border-dashed">
+            Tizim tayyor. Buyruqni kuting...
+        </div>
     </div>
 
-    <!-- Pastki menyu paneli (Dock) -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex justify-around items-center">
-        <button onclick="alert('Bosh sahifa')" class="text-2xl">🏠</button>
-        <button onclick="alert('Fayllar va Ma\'lumotlar')" class="text-2xl">📁</button>
-        <button onclick="alert('Xavfsizlik markazi')" class="text-2xl">🛡️</button>
-        <button onclick="alert('Sozlamalar')" class="text-2xl">⚙️</button>
+    <!-- Pastki Dock paneli -->
+    <div class="glass-panel rounded-2xl p-3 flex justify-around items-center">
+        <button onclick="systemHome()" class="text-2xl hover:scale-110 transition">🏛️</button>
+        <button onclick="openApp('Aloqa')" class="text-2xl hover:scale-110 transition">📡</button>
+        <button onclick="openApp('Sozlamalar')" class="text-2xl hover:scale-110 transition">⚙️</button>
     </div>
 
     <script>
-        // Soatni yangilab turish
+        // Haqiqiy vaqtni chiqarish
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }, 1000);
 
-        function openSystem() {
-            alert("Tox-System xususiy markaziga xush kelibsiz!");
+        // Haqiqiy telefon batareyasini o'qib olish (agar qurilma qo'llab-quvvatlasa)
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                function updateBattery() {
+                    const level = Math.round(battery.level * 100);
+                    document.getElementById('battery').innerText = level + '% ⚡';
+                }
+                updateBattery();
+            });
+        }
+
+        function openApp(appName) {
+            const box = document.getElementById('screen-box');
+            box.innerText = `[OK] ${appName} moduli ishga tushdi. Barcha jarayonlar shifrlangan.`;
+            box.style.borderColor = "#38bdf8";
+        }
+
+        // Telefonning texnik ma'lumotlarini chiqarish
+        function getDeviceInfo() {
+            const box = document.getElementById('screen-box');
+            const ua = navigator.userAgent;
+            box.innerText = `Qurilma: ${navigator.platform}\nBrauzer yadro: Shaxsiy Tox-Engine`;
+        }
+
+        function systemHome() {
+            const box = document.getElementById('screen-box');
+            box.innerText = "Bosh ekranga qaytildi. Tizim barqaror.";
         }
     </script>
 </body>
