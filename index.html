@@ -9,6 +9,7 @@
         body {
             background: radial-gradient(circle at center, #090d16 0%, #020408 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: pan-y;
         }
         .glass-panel {
             background: rgba(15, 23, 42, 0.85);
@@ -18,7 +19,19 @@
         .app-icon:active {
             transform: scale(0.92);
         }
-        /* Ilova ochilgandagi animatsiya */
+        /* Yuqoridan pastga tushuvchi parda (Control Center) */
+        #drop-panel {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #drop-panel.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* Ilova oynasi */
         #app-window {
             transition: all 0.3s ease;
             transform: scale(0.95);
@@ -32,17 +45,46 @@
         }
     </style>
 </head>
-<body class="text-white h-screen flex flex-col justify-between p-4 select-none overflow-hidden relative">
+<body class="text-white h-screen flex flex-col justify-between p-4 select-none overflow-hidden relative" id="main-body">
 
-    <!-- Status Bar -->
-    <div class="glass-panel flex justify-between items-center text-xs text-sky-300 px-4 py-2 rounded-2xl shadow-lg z-10">
+    <!-- Status Bar (Buni pastga tortsa panel ochiladi) -->
+    <div onclick="toggleDropPanel()" class="glass-panel flex justify-between items-center text-xs text-sky-300 px-4 py-2.5 rounded-2xl shadow-lg z-30 cursor-pointer active:scale-95 transition">
         <span id="clock" class="font-mono font-bold">00:00</span>
-        <span class="tracking-widest font-extrabold text-sky-400">TOX-SYSTEM KERNEL</span>
+        <span class="tracking-widest font-extrabold text-sky-400">TOX-SYSTEM ⚡ [Tortish]</span>
         <span id="battery" class="font-mono">--% ⚡</span>
     </div>
 
+    <!-- YUQORIDAN PASTGA TUSHUVCHI MAXSUS PANEL (Control Center) -->
+    <div id="drop-panel" class="absolute inset-x-4 top-16 glass-panel rounded-3xl p-5 z-40 shadow-2xl border border-sky-400/40">
+        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold tracking-widest text-sky-400">TOX CONTROL CENTER</span>
+            <button onclick="toggleDropPanel()" class="text-slate-400 hover:text-white text-sm">✕ Yopish</button>
+        </div>
+        
+        <!-- Tezkor tugmalar -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+                <span class="text-xl">🛡️</span>
+                <p class="text-[10px] mt-1 text-slate-300">Shzal</p>
+            </div>
+            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+                <span class="text-xl">📡</span>
+                <p class="text-[10px] mt-1 text-slate-300">Node</p>
+            </div>
+            <div onclick="toggleControl(this)" class="control-btn bg-slate-900/90 border border-sky-500/30 p-3 rounded-2xl text-center cursor-pointer transition">
+                <span class="text-xl">⚡</span>
+                <p class="text-[10px] mt-1 text-slate-300">Turbo</p>
+            </div>
+        </div>
+
+        <!-- Tizim holati -->
+        <div class="bg-slate-950/60 p-3 rounded-xl text-[11px] font-mono text-slate-400">
+            Holat: Barcha chastotalar xavfsiz. Tashqi ta'sir yo'q.
+        </div>
+    </div>
+
     <!-- Asosiy Ish Stoli (Desktop) -->
-    <div id="desktop" class="flex-1 flex flex-col justify-center items-center px-2 z-10">
+    <div class="flex-1 flex flex-col justify-center items-center px-2 z-10">
         <div class="w-full max-w-sm mb-6 text-center">
             <h2 class="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Xususiy Ekotizim</h2>
             <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System v1.0</h1>
@@ -85,14 +127,13 @@
         </div>
 
         <div class="glass-panel w-full max-w-sm p-3 rounded-2xl text-xs text-slate-400 text-center font-mono">
-            [Tox-Core]: Asosiy ekran faol. Ilovani tanlang.
+            [Tox-Core]: Yuqori panelni ochish uchun status bar ustiga bosing.
         </div>
     </div>
 
-    <!-- TO'LIQ EKRANDAGI ILOVA OYNASI (App Window) -->
+    <!-- TO'LIQ EKRANDAGI ILOVA OYNASI -->
     <div id="app-window" class="absolute inset-4 top-16 bottom-20 glass-panel rounded-3xl p-6 flex flex-col justify-between z-20 shadow-2xl border border-sky-500/30">
         <div>
-            <!-- Ilova sarlavhasi -->
             <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
                 <div class="flex items-center space-x-3">
                     <span id="app-icon-lg" class="text-3xl">📱</span>
@@ -100,9 +141,8 @@
                 </div>
                 <button onclick="closeApp()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 w-8 h-8 rounded-full flex items-center justify-center text-sm transition">✕</button>
             </div>
-            <!-- Ilova ichki mazmuni -->
             <div id="app-content-lg" class="text-sm text-slate-300 font-mono leading-relaxed whitespace-pre-line">
-                Ilova ma'lumotlari yuklanmoqda...
+                Ma'lumotlar yuklanmoqda...
             </div>
         </div>
         <div class="text-center text-[10px] text-slate-500 font-mono">
@@ -112,7 +152,7 @@
 
     <!-- Pastki Dock paneli -->
     <div class="glass-panel rounded-2xl p-3 flex justify-around items-center z-10">
-        <button onclick="closeApp()" class="text-xl hover:scale-110 transition">🏛️</button>
+        <button onclick="closeApp(); toggleDropPanel(false);" class="text-xl hover:scale-110 transition">🏛️</button>
         <button onclick="openApp('Terminal', '💻', 'root@tox-system:~# direct-exec\nAll systems nominal.')" class="text-xl hover:scale-110 transition">⚡</button>
         <button onclick="openApp('Sozlamalar', '⚙️', 'Versiya: Tox-System v1.0\nToxirjon Core')" class="text-xl hover:scale-110 transition">⚙️</button>
     </div>
@@ -137,18 +177,49 @@
             document.getElementById('battery').innerText = '100% ⚡';
         }
 
+        // Yuqoridan pastga tushuvchi panelni ochish/yopish
+        function toggleDropPanel(forceState) {
+            const panel = document.getElementById('drop-panel');
+            if (forceState === false) {
+                panel.classList.remove('active');
+            } else {
+                panel.classList.toggle('active');
+            }
+        }
+
+        // Tezkor tugmalar effekti
+        function toggleControl(el) {
+            el.classList.toggle('bg-sky-600/40');
+            el.classList.toggle('border-sky-400');
+        }
+
         // Ilovani to'liq ekranda ochish
         function openApp(name, icon, content) {
+            toggleDropPanel(false); // Paneldan ochilsa yopib qo'yish
             document.getElementById('app-title-lg').innerText = name;
             document.getElementById('app-icon-lg').innerText = icon;
             document.getElementById('app-content-lg').innerText = content;
             document.getElementById('app-window').classList.add('active');
         }
 
-        // Ilovani yopib bosh ekranga qaytish
+        // Ilovani yopish
         function closeApp() {
             document.getElementById('app-window').classList.remove('active');
         }
+
+        // Ekrandan pastga tortish harakatini sezish (Touch swipe down)
+        let touchStartY = 0;
+        window.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        window.addEventListener('touchend', e => {
+            let touchEndY = e.changedTouches[0].clientY;
+            // Agar barmoq ekran yuqorisidan pastga qarab tortilsa
+            if (touchStartY < 100 && touchEndY - touchStartY > 60) {
+                toggleDropPanel(true);
+            }
+        });
     </script>
 </body>
 </html>
