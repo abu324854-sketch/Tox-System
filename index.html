@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tox-System Sovereign Core</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- PWA (Progressive Web App) sozlamalari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tox-System">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#010409">
+    
     <style>
         body {
             background: #010409;
@@ -34,7 +40,6 @@
             opacity: 1;
             pointer-events: auto;
         }
-        /* Ekran yorqinligi uchun qoraytirish effekti */
         #brightness-overlay {
             position: fixed;
             inset: 0;
@@ -62,7 +67,12 @@
     <div class="flex-1 flex flex-col justify-center items-center px-1 z-10 overflow-y-auto py-2">
         <div class="w-full max-w-sm mb-3 text-center">
             <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System</h1>
-            <p class="text-[9px] text-slate-500 uppercase tracking-wider">To'liq Boshqariladigan Ekotizim</p>
+            <p class="text-[9px] text-slate-500 uppercase tracking-wider">Asosiy Ekran Rejimi (PWA)</p>
+            
+            <!-- Telefonga o'rnatish tugmasi (Asosiy ekranda chiqadi) -->
+            <button id="install-btn" onclick="installApp()" class="hidden mt-2 px-4 py-1.5 bg-gradient-to-r from-sky-500 to-indigo-600 rounded-xl text-xs font-bold text-white shadow-lg animate-pulse">
+                📲 Telefonga o'rnatish
+            </button>
         </div>
 
         <div class="grid grid-cols-4 gap-2.5 w-full max-w-sm">
@@ -149,6 +159,60 @@
     </div>
 
     <script>
+        // PWA Install Prompt (Telefonga o'rnatish mexanizmi)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-btn').classList.remove('hidden');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Foydalanuvchi ilovani o\'rnatdi');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('install-btn').classList.add('hidden');
+                });
+            } else {
+                alert("Ilova allaqachon o'rnatilgan yoki brauzeringiz bu funksiyani qo'llab-quvvatlamaydi. Brauzer menyusidan 'Asosiy ekranga qo'shish'ni tanlashingiz mumkin.");
+            }
+        }
+
+        // Manifestni dinamik qo'shish
+        const manifestData = {
+            "name": "Tox-System Sovereign",
+            "short_name": "Tox-System",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#010409",
+            "theme_color": "#010409",
+            "icons": [
+                {
+                    "src": "https://img.icons8.com/fluency/192/source-code.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+
+        // Service Worker (Oflayn ishlash uchun)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+                self.addEventListener('install', e => { e.waitUntil(self.skipWaiting()); });
+                self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+                self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
+            `)).catch(err => console.log('SW error:', err));
+        }
+
         let videoStream = null;
         let audioPlayer = null;
 
@@ -306,7 +370,7 @@
                             <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[10px] space-y-1">
                                 <p>• Firewall: Aktiv (AES-256)</p>
                                 <p>• Root Shield: Yoqilgan</p>
-                                <p>• Secure Node: Farg'ona Campus Sync</p>
+                                <p>• Oflayn Rejim: Faol</p>
                             </div>
                         </div>
                     `;
@@ -318,9 +382,9 @@
                         <div class="space-y-3">
                             <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
                                 <p class="text-xs font-bold text-sky-400">Cloud Pro Sinxronizatsiya</p>
-                                <p class="text-[10px] text-slate-400 mt-1">C:\\BulutPapkasi va Telegram Bot API orqali uzluksiz arxivlash faol.</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Mahalliy va bulutli ma'lumotlar buferi tayyor.</p>
                             </div>
-                            <button onclick="alert('Sinxronizatsiya muvaffaqiyatli yakunlandi!')" class="w-full py-2.5 bg-sky-600 rounded-xl text-xs font-bold">Hozir Sinxronizatsiya qilish ⚡</button>
+                            <button onclick="alert('Ma\'lumotlar muvaffaqiyatli saqlandi!')" class="w-full py-2.5 bg-sky-600 rounded-xl text-xs font-bold">Sinxronizatsiya qilish ⚡</button>
                         </div>
                     `;
                     break;
@@ -332,7 +396,7 @@
                             <div id="terminal-screen" class="bg-black p-3 rounded-xl border border-slate-800 text-[10px] h-44 overflow-y-auto font-mono text-green-400">
                                 root@tox-system:~# systemctl status<br>
                                 Kernel: Toxirjon-Core [OK]<br>
-                                Storage: 128GB NVMe [OK]<br>
+                                Status: PWA Tayyor<br>
                                 Type commands below...
                             </div>
                             <div class="flex space-x-2">
@@ -349,12 +413,12 @@
                         <div class="space-y-3">
                             <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
                                 <div class="flex justify-between"><span>Xotira (Storage):</span> <span class="text-sky-400">128 GB</span></div>
-                                <div class="flex justify-between"><span>Platforma:</span> <span class="text-sky-400">Windows / Mobile Hybrid</span></div>
-                                <div class="flex justify-between"><span>Batareya Holati:</span> <span id="sys-battery" class="text-emerald-400">Yuklanmoqda...</span></div>
-                                <div class="flex justify-between"><span>CPU Status:</span> <span class="text-emerald-400">Optimal (0.8 GHz)</span></div>
+                                <div class="flex justify-between"><span>Tarmoq:</span> <span id="net-status" class="text-emerald-400">Tekshirilmoqda...</span></div>
+                                <div class="flex justify-between"><span>Batareya:</span> <span id="sys-battery" class="text-emerald-400">Yuklanmoqda...</span></div>
                             </div>
                         </div>
                     `;
+                    document.getElementById('net-status').innerText = navigator.onLine ? "Online (Internet bor)" : "Offline (Oflayn rejim)";
                     if ('getBattery' in navigator) {
                         navigator.getBattery().then(b => {
                             document.getElementById('sys-battery').innerText = Math.round(b.level * 100) + '%';
@@ -367,18 +431,17 @@
                     contentEl.innerHTML = `
                         <div class="space-y-3 text-xs">
                             <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
-                                <p class="font-bold text-sky-400">Tox-System v1.0</p>
+                                <p class="font-bold text-sky-400">Tox-System v1.0 (PWA)</p>
                                 <p class="text-slate-400">Egasi: Fattoxov Abdulloh Toxirjon o'g'li</p>
-                                <p class="text-slate-400">O'quv maskani: Toshkent Menejment va Iqtisodiyot Instituti</p>
+                                <p class="text-slate-400">Institut: Toshkent Menejment va Iqtisodiyot</p>
                             </div>
 
-                            <!-- Haqiqiy boshqaruv funksiyalari -->
                             <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-3">
                                 <p class="font-bold text-sky-300">Tizim Boshqaruvi</p>
                                 
                                 <div class="flex justify-between items-center">
-                                    <span>Wi-Fi Moduli:</span>
-                                    <button onclick="toggleWifi()" id="wifi-btn" class="px-3 py-1 bg-emerald-600 rounded-lg text-white font-bold">Yoqilgan</button>
+                                    <span>Telefonga O'rnatish:</span>
+                                    <button onclick="installApp()" class="px-3 py-1 bg-emerald-600 rounded-lg text-white font-bold">O'rnatish</button>
                                 </div>
 
                                 <div class="flex justify-between items-center">
@@ -402,45 +465,27 @@
             }
         }
 
-        // Sozlamalar ichidagi funksiyalar
-        let wifiActive = true;
-        function toggleWifi() {
-            wifiActive = !wifiActive;
-            const btn = document.getElementById('wifi-btn');
-            if(wifiActive) {
-                btn.innerText = 'Yoqilgan';
-                btn.className = 'px-3 py-1 bg-emerald-600 rounded-lg text-white font-bold';
-            } else {
-                btn.innerText = 'O\'chirilgan';
-                btn.className = 'px-3 py-1 bg-red-600 rounded-lg text-white font-bold';
-            }
-        }
-
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert('To\'liq ekranga o\'tishda xatolik: ' + err.message);
-                });
+                document.documentElement.requestFullscreen().catch(err => {});
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         }
 
         function changeBrightness(val) {
             document.getElementById('bright-val').innerText = val + '%';
-            const overlay = document.getElementById('brightness-overlay');
-            const opacity = (100 - val) / 100 * 0.85; // qoraytirish darajasi
-            overlay.style.opacity = opacity;
+            document.getElementById('brightness-overlay').style.opacity = (100 - val) / 100 * 0.85;
         }
 
         function clearSystemCache() {
             localStorage.clear();
-            alert('Tizim keshi muvaffaqiyatli tozalandi va barcha parametrlar qayta yuklandi!');
+            if('caches' in window) {
+                caches.keys().then(names => { names.forEach(name => caches.delete(name)); });
+            }
+            alert('Kesh tozalandi va ma\'lumotlar yangilandi!');
         }
 
-        // Aloqa funksiyasi
         let phoneNum = "";
         function pressNum(n) {
             phoneNum += n;
@@ -451,17 +496,12 @@
             else alert('Raqam kiritilmadi!');
         }
 
-        // Xabar funksiyasi
         function sendSms() {
             const text = document.getElementById('sms-text').value;
-            if(text) {
-                window.location.href = `sms:?body=${encodeURIComponent(text)}`;
-            } else {
-                alert('Xabar matni bo\'sh!');
-            }
+            if(text) window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+            else alert('Xabar matni bo\'sh!');
         }
 
-        // Kamera yoqish
         function startCamera() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
                 .then(stream => {
@@ -469,18 +509,14 @@
                     const video = document.getElementById('video');
                     if(video) video.srcObject = stream;
                 })
-                .catch(err => {
-                    console.error(err);
-                });
+                .catch(err => {});
         }
 
-        // Brauzer ochish
         function loadWeb() {
             const url = document.getElementById('browser-url').value;
             document.getElementById('browser-frame').src = url;
         }
 
-        // Fayl yuklash
         function loadUploadedFile(input) {
             if(input.files.length > 0) {
                 const file = input.files[0];
@@ -497,14 +533,13 @@
                 if(galleryGrid && file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = e => {
-                        galleryGrid.innerHTML += `<img src="${e.target.result}" class="w-full h-24 object-cover rounded-xl border border-sky-500/30">`;
+                        galleryGrid.innerHTML += `<img src="${e.target.result}" class="w-full h-24 object-cover rounded-xl border border-sky-500/35">`;
                     };
                     reader.readAsDataURL(file);
                 }
             }
         }
 
-        // Musiqa ijro etish
         function loadMusicFile(input) {
             if(input.files.length > 0) {
                 const file = input.files[0];
@@ -516,7 +551,6 @@
             }
         }
 
-        // Terminal buyruqlari
         function runCommand() {
             const input = document.getElementById('terminal-input');
             const screen = document.getElementById('terminal-screen');
