@@ -2,15 +2,17 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tox-System Sovereign Core</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
         body {
             background: #010409;
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
-            touch-action: none;
+            touch-action: manipulation;
         }
         .tox-glass {
             background: rgba(3, 7, 18, 0.9);
@@ -18,13 +20,8 @@
             border: 1px solid rgba(14, 165, 233, 0.25);
             box-shadow: 0 0 20px rgba(14, 165, 233, 0.05);
         }
-        .core-pulse {
-            animation: pulse-ring 3s infinite;
-        }
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(14, 165, 233, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        .app-icon:active {
+            transform: scale(0.92);
         }
         #app-window {
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,86 +36,126 @@
         }
     </style>
 </head>
-<body class="text-white h-screen flex flex-col justify-between p-4 select-none relative">
+<body class="text-white h-screen flex flex-col justify-between p-3 select-none relative">
 
-    <!-- Yuqori Status Paneli (Standart emas, maxfiy chastota uslubida) -->
-    <div class="tox-glass flex justify-between items-center text-xs text-sky-400 px-4 py-2.5 rounded-xl z-30">
+    <!-- Status Paneli -->
+    <div class="tox-glass flex justify-between items-center text-xs text-sky-400 px-4 py-2 rounded-xl z-30">
         <span id="clock" class="font-mono">00:00:00</span>
-        <span class="tracking-widest font-black">TOXIRJON // KERNEL_ACTIVE</span>
+        <span class="tracking-widest font-black text-[10px]">TOXIRJON // SECURE</span>
         <span id="battery" class="font-mono">--% ⚡</span>
     </div>
 
-    <!-- Asosiy Noyob Markaz (Android/iOS ga o'xshamaydigan interfeys) -->
-    <div class="flex-1 flex flex-col justify-center items-center px-2 z-10">
-        <!-- Markaziy Yadro (Core Visualizer) -->
-        <div onclick="openApp('Tox Core', '⚡', 'Toxirjon Core — mustaqil xususiy yadro. Tashqi tarmoqlardan to\'la ajratilgan va shifrlangan.')" class="core-pulse w-32 h-32 rounded-full tox-glass flex flex-col items-center justify-center cursor-pointer mb-8 transition hover:scale-105">
-            <span class="text-4xl mb-1">🛡️</span>
-            <span class="text-[10px] tracking-widest text-sky-300 font-bold">TOX-CORE</span>
+    <!-- Asosiy Dasturlar Grid Paneli (Barcha ilovalar) -->
+    <div class="flex-1 flex flex-col justify-center items-center px-1 z-10 overflow-y-auto py-2">
+        <div class="w-full max-w-sm mb-3 text-center">
+            <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500">Tox-System</h1>
+            <p class="text-[9px] text-slate-500 uppercase tracking-wider">To'liq Xususiy Ekotizim</p>
         </div>
 
-        <!-- Modullar paneli (Grid o'rniga xususiy tarmoq tugmalari) -->
-        <div class="grid grid-cols-3 gap-3 w-full max-w-sm">
-            <div onclick="openApp('Aloqa Markazi', '📞', 'Xususiy shifrlangan aloqa kanallari faol.')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">📞</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Aloqa</p>
+        <div class="grid grid-cols-4 gap-2.5 w-full max-w-sm">
+            <!-- 1. Aloqa -->
+            <div onclick="openDialer()" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">📞</span>
+                <span class="text-[9px] text-slate-300">Aloqa</span>
             </div>
-            <div onclick="openApp('Xabarlar', '💬', 'Nolinchi darajali shifrlangan xabarlar uzatish.')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">💬</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Xabar</p>
+            <!-- 2. Xabarlar -->
+            <div onclick="openSms()" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">💬</span>
+                <span class="text-[9px] text-slate-300">Xabar</span>
             </div>
-            <div onclick="openApp('Optik Sensor', '📷', 'Tizim tomonidan boshqariladigan kamera va optika.')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">📷</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Optika</p>
+            <!-- 3. Kamera -->
+            <div onclick="openCamera()" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">📷</span>
+                <span class="text-[9px] text-slate-300">Kamera</span>
             </div>
-            <div onclick="openApp('Shifrlangan Ombor', '🗄️', 'C:\\BulutPapkasi va mahalliy xotira sinxronizatsiyasi.')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">🗄️</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Bulut</p>
+            <!-- 4. Galereya -->
+            <div onclick="openApp('Galereya', '🖼️', 'Mahalliy xotiradagi shifrlangan media fayllar va rasmlar ombori.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">🖼️</span>
+                <span class="text-[9px] text-slate-300">Galereya</span>
             </div>
-            <div onclick="openApp('Terminal', '💻', 'root@tox-system:~# systemctl start sovereign-mode')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">💻</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Terminal</p>
+            <!-- 5. Brauzer -->
+            <div onclick="openApp('Brauzer', '🌐', 'Tox-Net xususiy brauzer yadrosi. Barcha kuzatuvchilar va reklamalar bloklangan.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">🌐</span>
+                <span class="text-[9px] text-slate-300">Brauzer</span>
             </div>
-            <div onclick="openApp('Tizim Sozlamalari', '⚙️', 'Muallif: Fattoxov Abdulloh. Toxirjon Core arxitekturasi.')" class="tox-glass p-3 rounded-xl text-center cursor-pointer hover:border-sky-400 transition">
-                <span class="text-lg">⚙️</span>
-                <p class="text-[9px] text-slate-400 mt-1 uppercase">Sozlama</p>
+            <!-- 6. Musiqa -->
+            <div onclick="openApp('Musiqa', '🎵', 'Offlayn audio pleer va shifrlangan ovozli treklar moduli ulandi.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">🎵</span>
+                <span class="text-[9px] text-slate-300">Musiqa</span>
+            </div>
+            <!-- 7. Fayllar -->
+            <div onclick="openFiles()" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">📁</span>
+                <span class="text-[9px] text-slate-300">Fayllar</span>
+            </div>
+            <!-- 8. Himoya -->
+            <div onclick="openApp('Himoya', '🛡️', 'Firewall va xavfsizlik tizimi to\'liq quvvatda ishlamoqda. Tahdidlar aniqlanmadi.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">🛡️</span>
+                <span class="text-[9px] text-slate-300">Himoya</span>
+            </div>
+            <!-- 9. Bulut -->
+            <div onclick="openApp('Bulut', '🗄️', 'Cloud Pro shifrlangan bulutli xotira va C:\\BulutPapkasi sinxronizatsiyasi faol.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">🗄️</span>
+                <span class="text-[9px] text-slate-300">Bulut</span>
+            </div>
+            <!-- 10. Terminal -->
+            <div onclick="openApp('Terminal', '💻', 'root@tox-system:~# systemctl start sovereign-mode\nKernel: Toxirjon-Core active.\nStatus: All nodes encrypted.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">💻</span>
+                <span class="text-[9px] text-slate-300">Terminal</span>
+            </div>
+            <!-- 11. Temir -->
+            <div onclick="openApp('Temir', '📊', 'Qurilma apparat qismi va resurslar monitoringi barqaror. Xotira: 128 GB NVMe.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">📊</span>
+                <span class="text-[9px] text-slate-300">Temir</span>
+            </div>
+            <!-- 12. Sozlamalar -->
+            <div onclick="openApp('Sozlamalar', '⚙️', 'Tox-System v1.0\nMuallif: Fattoxov Abdulloh (Toxirjon Core).\nArxitektura: Mustaqil shifrlangan muhit.')" class="app-icon tox-glass flex flex-col items-center justify-center p-2.5 rounded-2xl cursor-pointer transition">
+                <span class="text-xl mb-1">⚙️</span>
+                <span class="text-[9px] text-slate-300">Sozlama</span>
             </div>
         </div>
     </div>
 
-    <!-- Pastdan qalqib chiquvchi to'liq ekran modul oynasi -->
-    <div id="app-window" class="absolute inset-x-2 bottom-2 top-16 tox-glass rounded-2xl p-6 flex flex-col justify-between z-20 shadow-2xl border border-sky-500/40">
+    <!-- Yashirin fayl tanlash -->
+    <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(this)">
+
+    <!-- To'liq ekran Ilova Oynasi -->
+    <div id="app-window" class="absolute inset-x-2 bottom-2 top-14 tox-glass rounded-2xl p-5 flex flex-col justify-between z-20 shadow-2xl border border-sky-500/40">
         <div>
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
                 <div class="flex items-center space-x-3">
                     <span id="app-icon-lg" class="text-2xl">⚡</span>
-                    <h2 id="app-title-lg" class="text-sm font-bold tracking-wider text-sky-400">MODUL</h2>
+                    <h2 id="app-title-lg" class="text-xs font-bold tracking-wider text-sky-400">MODUL</h2>
                 </div>
-                <button onclick="closeApp()" class="text-slate-400 hover:text-white text-xs px-3 py-1 rounded bg-slate-900 border border-slate-800">[YOPISH]</button>
+                <button onclick="closeApp()" class="text-slate-400 hover:text-white text-xs px-2.5 py-1 rounded bg-slate-900 border border-slate-800">[YOPISH]</button>
             </div>
-            <div id="app-content-lg" class="text-xs text-slate-300 font-mono leading-relaxed whitespace-pre-line">
+            <div id="app-content-lg" class="text-xs text-slate-300 font-mono leading-relaxed whitespace-pre-line overflow-y-auto max-h-[55vh]">
                 Ma'lumotlar yuklanmoqda...
             </div>
+            <div id="camera-container" class="hidden mt-2">
+                <video id="video" autoplay playsinline class="w-full h-56 object-cover rounded-xl border border-sky-500/30"></video>
+            </div>
         </div>
-        <div class="text-center text-[9px] text-slate-600 font-mono tracking-widest">
+        <div class="text-center text-[8px] text-slate-600 font-mono tracking-widest">
             TOX-SYSTEM // SOVEREIGN ARCHITECTURE
         </div>
     </div>
 
-    <!-- Pastki minimalist boshqaruv paneli -->
-    <div class="tox-glass rounded-xl p-3 flex justify-around items-center z-10">
-        <button onclick="closeApp()" class="text-sm tracking-widest text-sky-400">◆ YADRO</button>
-        <button onclick="openApp('Terminal', '💻', 'root@tox-system:~# status')" class="text-sm tracking-widest text-slate-400">◆ BUYRUQ</button>
-        <button onclick="openApp('Tizim Sozlamalari', '⚙️', 'Xususiy muhit faol.')" class="text-sm tracking-widest text-slate-400">◆ XAVFSIZLIK</button>
+    <!-- Pastki Minimal Dock Paneli -->
+    <div class="tox-glass rounded-xl p-2.5 flex justify-around items-center z-10">
+        <button onclick="closeApp()" class="text-xs tracking-widest text-sky-400">◆ ASOSIY</button>
+        <button onclick="openApp('Terminal', '💻', 'root@tox-system:~# direct-exec --active')" class="text-xs tracking-widest text-slate-400">◆ BUYRUQ</button>
+        <button onclick="openApp('Sozlamalar', '⚙️', 'Xususiy muhit barqaror.')" class="text-xs tracking-widest text-slate-400">◆ XAVFSIZLIK</button>
     </div>
 
     <script>
-        // Aniq vaqt (sekundlar bilan)
+        let videoStream = null;
+
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
         }, 1000);
 
-        // Batareya
         if ('getBattery' in navigator) {
             navigator.getBattery().then(b => {
                 document.getElementById('battery').innerText = Math.round(b.level * 100) + '% ⚡';
@@ -128,13 +165,62 @@
         }
 
         function openApp(name, icon, content) {
+            stopCamera();
+            document.getElementById('camera-container').classList.add('hidden');
+            document.getElementById('app-content-lg').classList.remove('hidden');
+            
             document.getElementById('app-title-lg').innerText = name.toUpperCase();
             document.getElementById('app-icon-lg').innerText = icon;
             document.getElementById('app-content-lg').innerText = content;
             document.getElementById('app-window').classList.add('active');
         }
 
+        function openDialer() {
+            window.location.href = 'tel:';
+        }
+
+        function openSms() {
+            window.location.href = 'sms:';
+        }
+
+        function openFiles() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileSelect(input) {
+            if (input.files.length > 0) {
+                const fileName = input.files[0].name;
+                openApp('Fayllar', '📁', `Tanlangan fayl muvaffaqiyatli ochildi:\n📁 ${fileName}\nStatus: Shifrlangan xotiraga ulandi.`);
+            }
+        }
+
+        function openCamera() {
+            openApp('Kamera', '📷', 'Optik sensor ishga tushirilmoqda...');
+            document.getElementById('app-content-lg').classList.add('hidden');
+            document.getElementById('camera-container').classList.remove('hidden');
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+                .then(stream => {
+                    videoStream = stream;
+                    const video = document.getElementById('video');
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    document.getElementById('app-content-lg').classList.remove('hidden');
+                    document.getElementById('camera-container').classList.add('hidden');
+                    document.getElementById('app-content-lg').innerText = 'Kameraga ruxsat berilmadi: ' + err.message;
+                });
+        }
+
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+
         function closeApp() {
+            stopCamera();
             document.getElementById('app-window').classList.remove('active');
         }
     </script>
